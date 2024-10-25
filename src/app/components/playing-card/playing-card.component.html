@@ -2,16 +2,16 @@
     <div id="inside">
         <header>
             <div class="left">
-                <div id="name">My monster</div>
+                <div id="name">{{monster().name}}</div>
             </div>
             <div class="right">
-                <div id="hp">40 HP</div>
+                <div id="hp">{{monster().hp}} HP</div>
                 <img class="icon" src="img/electric.png" />
             </div>
         </header>
         <figure id="art">
             <img src="img/sipa.png">
-            <figcaption>N°025 Monster</figcaption>
+            <figcaption>{{monster().figureCaption}}</figcaption>
         </figure>
         <div id="capacities">
             <div class="capacity">
@@ -20,12 +20,12 @@
                         <img class="icon" src="img/electric.png" />
                         <img class="icon" src="img/electric.png" />
                     </div>
-                    <div class="name">Geo Impact</div>
-                    <div class="damage">60</div>
+                    <div class="name">{{monster().attackName}}</div>
+                    <div class="damage">{{monster().attackStrength}}</div>
                 </div>
             </div>
             <div class="description">
-                    This is a long description of a monster capacity. Probably something to do with electricity.
+                    {{monster().attackDescription}}
             </div>
         </div>
     </div>
