@@ -16,7 +16,8 @@ export class PlayingCardComponent {
       value.hp = value.hp / 2;
       return value;
     }
-  }) */ monster: InputSignal<Monster> = input(new Monster(), {
+  }) */ 
+  monster: InputSignal<Monster> = input(new Monster(), {
     alias: 'my-monster',
     transform: (value: Monster) => {
       value.hp = value.hp / 2;
