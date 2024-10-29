@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, computed, effect, signal } from '@angular/core';
 import { PlayingCardComponent } from './components/playing-card/playing-card.component';
 import { Monster } from './models/monster.model';
 import { SearchBarComponent } from "./components/search-bar/search-bar.component";
+import { MonsterType } from './utils/monster.utils';
 
 @Component({
   selector: 'app-root',
@@ -16,10 +17,18 @@ export class AppComponent {
   count: number = 0;
   search = '';
 
-  selectedMonsterIndex = 0;
+  selectedMonsterIndex = signal(1);
+  selectedMonster = computed(() => {
+    return this.monsters[this.selectedMonsterIndex()];
+  })
 
   constructor(){
-    this.monsters = []
+
+    effect(() => {
+      console.log(this.selectedMonster());
+    })
+    
+    this.monsters = [];
 
     const monster1 = new Monster();
     monster1.name = "Pik";
@@ -29,6 +38,8 @@ export class AppComponent {
 
     const monster2 = new Monster();
     monster2.name = "Car";
+    monster2.image = "img/coeur.png";
+    monster1.type = MonsterType.WATER;
     monster2.hp = 58;
     monster2.figureCaption = "N°003 Car";
     this.monsters.push(monster2);
@@ -39,6 +50,6 @@ export class AppComponent {
   }
 
   toggleMonster() {
-    this.selectedMonsterIndex = (this.selectedMonsterIndex + 1) % this.monsters.length
+    this.selectedMonsterIndex.set((this.selectedMonsterIndex() + 1) % this.monsters.length)
   }
 }
