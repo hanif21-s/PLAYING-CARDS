@@ -1,4 +1,5 @@
-import { Component, computed, effect, model, signal } from '@angular/core';
+import { MonsterService } from './services/monster/monster.service';
+import { Component, computed, effect, inject, model, signal } from '@angular/core';
 import { PlayingCardComponent } from './components/playing-card/playing-card.component';
 import { Monster } from './models/monster.model';
 import { SearchBarComponent } from "./components/search-bar/search-bar.component";
@@ -13,58 +14,35 @@ import { CommonModule } from '@angular/common';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
+
+  monsterService = inject(MonsterService);
   
-  monsters!: Monster[];
+  monsters = signal<Monster[]>([]);
   /* count: number = 0;
   search = ''; */
   search = model('');
 
   filteredMonsters = computed(() => {
-    return this.monsters.filter(monster => monster.name.includes(this.search()));
+    return this.monsters().filter(monster => monster.name.includes(this.search()));
   })
 
-  selectedMonsterIndex = signal(1);
+  /* selectedMonsterIndex = signal(1);
   selectedMonster = computed(() => {
     return this.monsters[this.selectedMonsterIndex()];
-  })
+  }) */
 
   constructor(){
 
     /* effect(() => {
       console.log(this.selectedMonster());
     }) */
-    
-    this.monsters = [];
+    this.monsters.set(this.monsterService.getAll());
+  }
 
-    const monster1 = new Monster();
-    monster1.name = "Pik";
-    monster1.hp = 18;
-    monster1.figureCaption = "N°002 Pik";
-    this.monsters.push(monster1);
-
-    const monster2 = new Monster();
-    monster2.name = "Coeur";
-    monster2.image = "img/coeur.png";
-    monster2.type = MonsterType.WATER;
-    monster2.hp = 58;
-    monster2.figureCaption = "N°003 Coeur";
-    this.monsters.push(monster2);
-
-    const monster3 = new Monster();
-    monster3.name = "Trefle";
-    monster3.image = "img/trefle.jpg";
-    monster3.type = MonsterType.PLANT;
-    monster3.hp = 58;
-    monster3.figureCaption = "N°004 Trefle";
-    this.monsters.push(monster3);
-
-    const monster4 = new Monster();
-    monster4.name = "Carreau";
-    monster4.image = "img/carreau.jpg";
-    monster4.type = MonsterType.FIRE;
-    monster4.hp = 58;
-    monster4.figureCaption = "N°003 Carreau";
-    this.monsters.push(monster4);
+  addMonster() {
+    const genericMonster = new Monster();
+    this.monsterService.add(genericMonster);
+    this.monsters.set(this.monsterService.getAll());
   }
 
   /* increaseCount() {
