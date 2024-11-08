@@ -2,7 +2,7 @@
 <div id="card-list">
     @for (monster of filteredMonsters(); track monster.name; let i=$index) {
         <div>Carte {{i}}</div>
-        <app-playing-card  [monster]="monster"/>
+        <app-playing-card  [monster]="monster" (click)="openMonster(monster)"/>
     } @empty {
         <div class="center">No monsters found !</div>
     }
@@ -12,7 +12,7 @@
 }
 
 <div class="center">
-    <button (click)="addMonster()">Add Generic Monster</button><br/><br/>
+    <button (click)="addMonster()">Add Monster</button><br/><br/>
 </div>
 
 
