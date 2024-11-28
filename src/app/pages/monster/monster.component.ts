@@ -1,7 +1,7 @@
 import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { filter, of, Subscription, switchMap } from 'rxjs';
 import { MonsterType } from '../../utils/monster.utils';
 import { Monster } from '../../models/monster.model';
 import { PlayingCardComponent } from '../../components/playing-card/playing-card.component';
@@ -35,6 +35,10 @@ export class MonsterComponent implements OnInit, OnDestroy{
 
   private  routeSubscription: Subscription | null = null;
 
+  private saveSubscription: Subscription | null = null;
+
+  private deleteSubscription: Subscription | null = null;
+
   /* name = new FormControl('', [Validators.required]);
   hp = new FormControl(0, [Validators.required, Validators.min(1), Validators.max(200)]) */
 
@@ -65,21 +69,27 @@ export class MonsterComponent implements OnInit, OnDestroy{
       this.formValueSubscription = this.formGroup.valueChanges.subscribe(data => {
         this.monster = Object.assign(new Monster(), data);
       })
-      this.routeSubscription = this.route.params.subscribe(params => {
-        if (params['monster']) {
-          this.monsterId = parseInt(params['monster']);
-          const monsterFound = this.monsterService.get(this.monsterId);
-          if (monsterFound) {
-            this.monster = monsterFound;
+      this.routeSubscription = this.route.params.pipe(
+        switchMap(params => {
+          if (params['monster']) {
+            this.monsterId = parseInt(params['monster']);
+            return this.monsterService.get(this.monsterId);
+          }
+          return of(null);
+        })
+      ).subscribe(monster => {
+          if (monster) {
+            this.monster = monster;
             this.formGroup.patchValue(this.monster);
           }
-        }
       });
     }
 
   ngOnDestroy(): void {
     this.formValueSubscription?.unsubscribe();
     this.routeSubscription?.unsubscribe();
+    this.deleteSubscription?.unsubscribe();
+    this.saveSubscription?.unsubscribe();
   }
 
   /* next() {
@@ -90,12 +100,16 @@ export class MonsterComponent implements OnInit, OnDestroy{
 
   submit(event: Event){
     event.preventDefault();
+    let saveObservable = null;
     if (this.monsterId == -1) {
-      this.monsterService.add(this.monster);
+      saveObservable = this.monsterService.add(this.monster);
     } else {
       this.monster.id = this.monsterId;
-      this.monsterService.update(this.monster);
+      saveObservable = this.monsterService.update(this.monster);
     }
+    this.saveSubscription = saveObservable.subscribe(_ => {
+      this.navigateBack();
+    })
     this.navigateBack();
   }
 
@@ -109,11 +123,11 @@ export class MonsterComponent implements OnInit, OnDestroy{
   }
   deleteMonster(){
     const dialogref = this.dialog.open(DeleteMonsterConfirmationDialogComponent)
-    dialogref.afterClosed().subscribe(confirmation => {
-      if (confirmation) {
-        this.monsterService.delete(this.monsterId);
+    dialogref.afterClosed().pipe(
+      filter(confirmation => confirmation),
+      switchMap(_ => this.monsterService.delete(this.monsterId))
+    ).subscribe(_ => {
         this.navigateBack();
-      }
     })
   }
 

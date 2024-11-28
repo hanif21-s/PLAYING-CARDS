@@ -5,11 +5,13 @@ import { CommonModule } from '@angular/common';
 import { PlayingCardComponent } from '../../components/playing-card/playing-card.component';
 import { SearchBarComponent } from '../../components/search-bar/search-bar.component';
 import { Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-monster-list',
   standalone: true,
-  imports: [CommonModule, PlayingCardComponent, SearchBarComponent],
+  imports: [CommonModule, PlayingCardComponent, SearchBarComponent, MatButtonModule],
   templateUrl: './monster-list.component.html',
   styleUrl: './monster-list.component.css'
 })
@@ -17,27 +19,19 @@ export class MonsterListComponent {
   private monsterService = inject(MonsterService);
   private router = inject(Router);
   
-  monsters = signal<Monster[]>([]);
+  monsters = toSignal(this.monsterService.getAll());
   /* count: number = 0;
   search = ''; */
   search = model('');
 
   filteredMonsters = computed(() => {
-    return this.monsters().filter(monster => monster.name.includes(this.search()));
+    return this.monsters()?.filter(monster => monster.name.includes(this.search())) ?? [];
   })
 
   /* selectedMonsterIndex = signal(1);
   selectedMonster = computed(() => {
     return this.monsters[this.selectedMonsterIndex()];
   }) */
-
-  constructor(){
-
-    /* effect(() => {
-      console.log(this.selectedMonster());
-    }) */
-    this.monsters.set(this.monsterService.getAll());
-  }
 
   addMonster() {
     this.router.navigate(['monster']);
